@@ -30,18 +30,22 @@ module.exports = {
                { $addToSet: { thoughts: thought._id } },
                { new: true }
             )
+            .then((user) => {
+               if (!user) {
+                  // remove thought if no such user
+                  Thought.findOneAndRemove({ _id: thoughtId})
+                  .catch((err) => res.status(500).json(err));
+                  res.status(404).json({ message: 'No user with that username, thought deleted' })
+               } else {
+                  res.json({ message: 'Thought created' })
+               }
+            })
+            .catch((err) => {
+               console.log(err);
+               res.status(500).json(err);
+            });
          }
          )
-         .then((user) => {
-            if (!user) {
-               // remove thought if no such user
-               Thought.findOneAndRemove({ _id: thoughtId})
-               .catch((err) => res.status(500).json(err));
-               res.status(404).json({ message: 'No user with that ID, thought deleted' })
-            } else {
-               res.json({ message: 'Thought created' })
-            }
-         })
          .catch((err) => {
             console.log(err);
             res.status(500).json(err);
