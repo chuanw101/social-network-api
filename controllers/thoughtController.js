@@ -21,23 +21,27 @@ module.exports = {
 
    // create new thought
    createThought(req, res) {
+      let thoughtId;
       Thought.create(req.body)
-         .then((thought) =>
-            !thought
-               ? res.status(404).json({ message: 'No thought with that ID' })
-               : User.findOneAndUpdate(
-                  { username: req.body.username },
-                  { $addToSet: { thoughts: thought._id } },
-                  { new: true }
+         .then((thought) => {
+            thoughtId = thought._id;
+            User.findOneAndUpdate(
+               { username: req.body.username },
+               { $addToSet: { thoughts: thought._id } },
+               { new: true }
             )
+         }
          )
-         .then((user) =>
-            !user
-               ? res.status(404).json({
-                  message: 'No user with that ID',
-               })
-               : res.json({ message: 'Thought created' })
-         )
+         .then((user) => {
+            if (!user) {
+               // remove thought if no such user
+               Thought.findOneAndRemove({ _id: thoughtId})
+               .catch((err) => res.status(500).json(err));
+               res.status(404).json({ message: 'No user with that ID, thought deleted' })
+            } else {
+               res.json({ message: 'Thought created' })
+            }
+         })
          .catch((err) => {
             console.log(err);
             res.status(500).json(err);
@@ -74,12 +78,7 @@ module.exports = {
                   { new: true }
                )
          )
-         .then((user) =>
-            !user
-               ? res.status(404).json({
-                  message: 'Thought deleted but no user with that ID',
-               })
-               : res.json({ message: 'Thought deleted' })
+         .then((user) => res.json({ message: 'Thought deleted' })
          )
          .catch((err) => res.status(500).json(err));
    },
