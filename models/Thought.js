@@ -1,4 +1,4 @@
-const { Schema, model } = require('mongoose');
+const { Schema, model, Types } = require('mongoose');
 
 // reaction just ot use here, not exporting
 const reactionSchema = new Schema(
@@ -60,7 +60,7 @@ const thoughtSchema = new Schema(
 );
 
 // Create a virtual property `reactionCount` that gets the total number of reactions a thought has
-postSchema
+thoughtSchema
     .virtual('reactionCount')
     // Getter
     .get(function () {

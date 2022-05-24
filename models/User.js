@@ -36,7 +36,7 @@ const userSchema = new Schema(
 );
 
 // Create a virtual property `friendCount` that gets the total number of friends user has
-postSchema
+userSchema
   .virtual('friendCount')
   // Getter
   .get(function () {
